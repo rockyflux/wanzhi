@@ -26,6 +26,20 @@ npm run dev
 | `SUPABASE_SECRET_KEY` | `npm run db:seed`（Auth Admin API） |
 | `SUPABASE_DB_PASSWORD` | `npm run db:schema`、导入脚本 |
 
+## 部署（GitHub Pages）
+
+推送到 `main` 会触发 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)，构建前端并发布到 Pages。
+
+1. 仓库 **Settings → Pages → Build and deployment → Source** 选 **GitHub Actions**
+2. **Settings → Secrets and variables → Actions → Variables** 添加：
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`
+3. 推送 `main`，或在 Actions 里手动跑 **Deploy to GitHub Pages**
+
+站点地址一般是 `https://<用户名>.github.io/<仓库名>/`（本仓库为 `/wanzhi/`）。本地开发不设 `VITE_BASE`，默认 `/`。
+
+Supabase 控制台里把该 Pages 源站加入 Auth 的 Redirect / Site URL。数据库仍用本机 `npm run db:schema` / 导入脚本，不进部署流水线。
+
 ## 数据库
 
 ```bash

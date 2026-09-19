@@ -12,9 +12,9 @@ const pageSize = ref(20)
 const formPackId = ref<number | null>(null)
 const categoryLoading = ref(false)
 const categoryOptions = ref<Array<{ id: number; label: string }>>([])
-const editing = ref<(Partial<Site> & { title: string; url: string; categoryId: number | null }) | null>(
-  null,
-)
+const editing = ref<
+  (Omit<Partial<Site>, 'categoryId'> & { title: string; url: string; categoryId: number | null }) | null
+>(null)
 const dialogVisible = computed({
   get: () => editing.value != null,
   set: (open) => {
