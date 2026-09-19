@@ -48,17 +48,11 @@ jobs:
           fi
 
       - name: Build
-        # Vite 只在构建时把 VITE_* 打进包；Secrets / Variables 都可以。
+        run: npm run build
         env:
           VITE_BASE: ${{ steps.base.outputs.path }}
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-        run: |
-          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then
-            echo "::error::缺少 VITE_SUPABASE_URL 或 VITE_SUPABASE_PUBLISHABLE_KEY。请到 Settings → Secrets and variables → Actions，在 Variables 或 Secrets 里添加同名项（不要加在 Environment 以外的地方漏配）。"
-            exit 1
-          fi
-          npm run build
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
 
       - name: SPA fallback for GitHub Pages
         run: cp dist/index.html dist/404.html
