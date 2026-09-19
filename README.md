@@ -30,7 +30,7 @@ npm run dev
 
 推送到 `main` 会触发 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)，构建前端并发布到 Pages。
 
-1. 仓库 **Settings → Pages → Build and deployment → Source** 选 **GitHub Actions**
+1. **先启用 Pages（必做一次）**：打开 [Settings → Pages](https://github.com/rockyflux/wanzhi/settings/pages)，**Build and deployment → Source** 选 **GitHub Actions**。未启用时 Actions 会报 `Pages site Not Found`。
 2. **Settings → Secrets and variables → Actions → Variables** 添加：
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_PUBLISHABLE_KEY`
