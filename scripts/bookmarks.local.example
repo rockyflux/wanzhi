@@ -1,0 +1,3 @@
+# Bookmarks 仓库根目录，其下要有 packs/。
+# 复制为本目录的 bookmarks.local（已被 git 忽略），或改用 --bookmarks-root / BOOKMARKS_DIR。
+D:\path\to\Bookmarks

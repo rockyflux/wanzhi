@@ -1,0 +1,31 @@
+{
+  "name": "wanzi",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "db:schema": "node scripts/apply-schema.mjs",
+    "db:seed": "node scripts/seed-users.mjs && node scripts/seed-sample.mjs"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.134",
+    "@iconify/vue": "^5.0.2",
+    "@supabase/supabase-js": "^2.116.0",
+    "element-plus": "^2.14.6",
+    "pinia": "^4.0.3",
+    "vue": "^3.5.42",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@vue/tsconfig": "^0.9.1",
+    "pg": "^8.23.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0",
+    "vue-tsc": "^3.3.11"
+  }
+}

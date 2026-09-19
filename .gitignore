@@ -1,0 +1,26 @@
+# secrets and machine-local paths
+.env
+.env.*
+!.env.example
+scripts/bookmarks.local
+
+# local tooling, not part of the app
+.cursor/
+.tmp-ui/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# node
+node_modules/
+dist/
+dist-ssr
+
+# editor / os
+.DS_Store
+Thumbs.db
+*.log
+.idea
