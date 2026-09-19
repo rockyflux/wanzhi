@@ -31,9 +31,10 @@ npm run dev
 推送到 `main` 会触发 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)，构建前端并发布到 Pages。
 
 1. **先启用 Pages（必做一次）**：打开 [Settings → Pages](https://github.com/rockyflux/wanzhi/settings/pages)，**Build and deployment → Source** 选 **GitHub Actions**。未启用时 Actions 会报 `Pages site Not Found`。
-2. **Settings → Secrets and variables → Actions → Variables** 添加：
+2. **Settings → Secrets and variables → Actions** 添加（Variables 或 Secrets 均可，名字必须完全一致）：
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_PUBLISHABLE_KEY`
+   这两个会在 **Build** 步骤注入；改完后必须重新跑部署，已上线的 JS 不会自动更新。
 3. 推送 `main`，或在 Actions 里手动跑 **Deploy to GitHub Pages**
 
 站点地址一般是 `https://<用户名>.github.io/<仓库名>/`（本仓库为 `/wanzhi/`）。本地开发不设 `VITE_BASE`，默认 `/`。
