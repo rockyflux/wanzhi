@@ -11,6 +11,12 @@ const router = createRouter({
       meta: { bookmark: true },
     },
     {
+      path: '/p/:slug/c/:categoryId',
+      name: 'pack-category',
+      component: () => import('../views/HomeView.vue'),
+      meta: { bookmark: true },
+    },
+    {
       path: '/p/:slug',
       name: 'pack',
       component: () => import('../views/HomeView.vue'),
@@ -21,6 +27,7 @@ const router = createRouter({
       name: 'site',
       component: () => import('../views/SiteDetailView.vue'),
       props: true,
+      meta: { bookmark: true },
     },
     {
       path: '/login',

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import PackIcon from '../../components/PackIcon.vue'
 import PackIconPicker from '../../components/PackIconPicker.vue'
 import { defaultPackIcon, normalizePackIcon, PACK_TONE_PRESETS, packTone } from '../../lib/packIcons'
 import type { PackInput } from '../../stores/catalog'
 import { useCatalogStore } from '../../stores/catalog'
 import type { Pack } from '../../types'
+import { ElMessage, ElMessageBox } from '../../lib/epFeedback'
 
 const catalog = useCatalogStore()
 const loading = ref(true)

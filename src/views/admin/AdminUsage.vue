@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
 import { supabase } from '../../lib/supabase'
+import { ElMessage } from '../../lib/epFeedback'
 
 type TableUsage = {
   name: string

@@ -24,7 +24,7 @@
 | 下载 HTML / Markdown | `src/lib/exportPack.ts` |
 | 页面 | `src/views/`，管理页在 `views/admin/` |
 
-用户名不含 `@` 时，Auth 邮箱是 `用户名@wanzi.local`。
+注册与登录用邮箱。旧试用账号仍可用短名（会映射为 `短名@wanzi.local`）。
 
 ## 密钥
 

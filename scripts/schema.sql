@@ -174,6 +174,35 @@ begin
 end;
 $$;
 
+-- 管理台重置他人密码（浏览器无 Publishable key，不能走 Auth Admin API）
+create or replace function public.admin_reset_password(p_user_id uuid, p_new_password text)
+returns void
+language plpgsql
+security definer
+set search_path = public, extensions, auth
+as $$
+begin
+  if auth.uid() is null or not public.is_admin() then
+    raise exception 'admin only';
+  end if;
+  if p_user_id is null then
+    raise exception 'user required';
+  end if;
+  if p_new_password is null or char_length(btrim(p_new_password)) < 6 then
+    raise exception 'password must be at least 6 characters';
+  end if;
+  if not exists (select 1 from auth.users where id = p_user_id) then
+    raise exception 'user not found';
+  end if;
+
+  update auth.users
+  set
+    encrypted_password = crypt(btrim(p_new_password), gen_salt('bf')),
+    updated_at = now()
+  where id = p_user_id;
+end;
+$$;
+
 create or replace function public.category_set_path()
 returns trigger
 language plpgsql
@@ -310,6 +339,9 @@ grant execute on function public.is_admin() to anon, authenticated, service_role
 
 revoke all on function public.record_login() from public;
 grant execute on function public.record_login() to authenticated, service_role;
+
+revoke all on function public.admin_reset_password(uuid, text) from public;
+grant execute on function public.admin_reset_password(uuid, text) to authenticated, service_role;
 
 revoke all on function public.handle_new_user() from public;
 revoke all on function public.protect_profile_role() from public;

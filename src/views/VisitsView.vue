@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { toast } from '../lib/toast'
 import AccountNav from '../components/AccountNav.vue'
 import BookmarkShell from '../components/BookmarkShell.vue'
+import SimplePager from '../components/SimplePager.vue'
 import { faviconSrc } from '../lib/exportPack'
 import { formatDate, hostOf } from '../lib/tree'
 import { useCatalogStore } from '../stores/catalog'
@@ -32,7 +33,7 @@ onMounted(async () => {
     await catalog.loadVisits()
     rows.value = catalog.visitRows()
   } catch (e) {
-    ElMessage.error(e instanceof Error ? e.message : '加载失败')
+    toast.error(e instanceof Error ? e.message : '加载失败')
   } finally {
     loading.value = false
   }
@@ -110,14 +111,7 @@ function goDetail(id: number) {
                 </div>
               </div>
               <div v-if="total > 0" class="pager">
-                <el-pagination
-                  v-model:current-page="page"
-                  v-model:page-size="pageSize"
-                  :total="total"
-                  :page-sizes="[10, 20, 50, 100]"
-                  layout="total, sizes, prev, pager, next, jumper"
-                  background
-                />
+                <SimplePager v-model:page="page" v-model:page-size="pageSize" :total="total" />
               </div>
             </template>
           </section>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, ref, watch, type Ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { toast } from '../lib/toast'
 import FolderNav from '../components/FolderNav.vue'
 import AccountNav from '../components/AccountNav.vue'
 import { faviconSrc } from '../lib/exportPack'
@@ -41,6 +41,29 @@ const crumbs = computed(() =>
     ? []
     : categoryBreadcrumb(catalog.categories, catalog.selectedCategoryId),
 )
+const routeCategoryId = computed(() => {
+  const raw = route.params.categoryId
+  if (raw == null || raw === '') return null
+  const id = Number(raw)
+  return Number.isFinite(id) ? id : null
+})
+
+function expandToCategory(id: number | null) {
+  openIds.value =
+    id == null ? [] : categoryBreadcrumb(catalog.categories, id).map((c) => c.id)
+}
+
+async function applyRouteCategory() {
+  const want = routeCategoryId.value
+  if (want == null) return
+  if (!findCategory(catalog.categories, want)) return
+  if (catalog.selectedCategoryId === want) {
+    expandToCategory(want)
+    return
+  }
+  await catalog.selectCategory(want)
+  expandToCategory(want)
+}
 
 watch(
   slug,
@@ -51,17 +74,26 @@ watch(
     sidebarOpen.value = false
     try {
       const loaded = await catalog.enterPack(value)
-      const current = catalog.selectedCategoryId
-      openIds.value =
-        current == null ? [] : categoryBreadcrumb(catalog.categories, current).map((c) => c.id)
+      await applyRouteCategory()
+      expandToCategory(catalog.selectedCategoryId)
       if (loaded) document.title = `${loaded.name} · 书签大礼包`
       if (auth.isLoggedIn) await catalog.loadFavorites()
     } catch (e) {
-      ElMessage.error(e instanceof Error ? e.message : '加载失败')
+      toast.error(e instanceof Error ? e.message : '加载失败')
     }
   },
   { immediate: true },
 )
+
+watch(routeCategoryId, async (want, prev) => {
+  if (want == null || want === prev) return
+  if (!slug.value || !pack.value) return
+  try {
+    await applyRouteCategory()
+  } catch (e) {
+    toast.error(e instanceof Error ? e.message : '加载失败')
+  }
+})
 
 watch(query, async (value) => {
   const q = value.trim()
@@ -73,7 +105,7 @@ watch(query, async (value) => {
   try {
     searchHits.value = await catalog.searchSites(pack.value.id, q)
   } catch (e) {
-    ElMessage.error(e instanceof Error ? e.message : '搜索失败')
+    toast.error(e instanceof Error ? e.message : '搜索失败')
   } finally {
     searching.value = false
   }
@@ -97,6 +129,33 @@ async function select(id: number) {
   sidebarOpen.value = false
   query.value = ''
   searchHits.value = []
+  if (slug.value) {
+    void router.replace({
+      name: 'pack-category',
+      params: { slug: slug.value, categoryId: String(id) },
+    })
+  }
+}
+
+function shareUrl(): string {
+  const id = catalog.selectedCategoryId
+  if (!slug.value || id == null) return ''
+  const href = router.resolve({
+    name: 'pack-category',
+    params: { slug: slug.value, categoryId: String(id) },
+  }).href
+  return new URL(href, window.location.origin).toString()
+}
+
+async function shareCategory() {
+  const url = shareUrl()
+  if (!url) return
+  try {
+    await navigator.clipboard.writeText(url)
+    toast.success('分类链接已复制')
+  } catch {
+    toast.error('复制失败，请手动复制地址栏链接')
+  }
 }
 
 function toggle(id: number) {
@@ -123,13 +182,13 @@ async function onFav(site: Site) {
   try {
     const res = await catalog.toggleFavorite(site.id)
     if (!res.ok) {
-      ElMessage.warning(res.message)
+      toast.warning(res.message)
       router.push({ name: 'login', query: { redirect: route.fullPath } })
       return
     }
-    ElMessage.success(res.message)
+    toast.success(res.message)
   } catch (e) {
-    ElMessage.error(e instanceof Error ? e.message : '操作失败')
+    toast.error(e instanceof Error ? e.message : '操作失败')
   }
 }
 
@@ -238,11 +297,27 @@ function folderOf(site: Site) {
         </template>
         <template v-else-if="catalog.selectedCategory">
           <div class="breadcrumb">
-            <span>{{ pack?.name }}</span>
-            <template v-for="c in crumbs" :key="c.id">
-              <span>/</span>
-              <button type="button" @click="select(c.id)">{{ c.name }}</button>
-            </template>
+            <div class="breadcrumb-path">
+              <span>{{ pack?.name }}</span>
+              <template v-for="c in crumbs" :key="c.id">
+                <span>/</span>
+                <button type="button" @click="select(c.id)">{{ c.name }}</button>
+              </template>
+            </div>
+            <button
+              type="button"
+              class="breadcrumb-share"
+              title="复制分类链接，对方打开即见此列表"
+              aria-label="分享当前分类"
+              @click="shareCategory"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15" aria-hidden="true">
+                <path
+                  d="M12.586 3.586a2 2 0 112.828 2.828l-4.243 4.243a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l4.243-4.243a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5.95 8.657a2 2 0 010 2.828l-1.5 1.5a2 2 0 11-2.828-2.828l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a4 4 0 105.656 5.656l1.5-1.5a4 4 0 000-5.656 1 1 0 00-1.414 1.414z"
+                />
+              </svg>
+              <span>分享</span>
+            </button>
           </div>
           <section class="category-section">
             <div class="section-head">

@@ -167,11 +167,23 @@ export const useCatalogStore = defineStore('catalog', () => {
   function persistPackCategorySnapshot(packId: number) {
     const pid = Number(packId)
     const tree = treeOf(pid)
+    if (!tree.length) return
     const counts: Record<number, number> = {}
     for (const c of flattenCategories(tree)) {
       if (countsByCategory.value[c.id] != null) counts[c.id] = countsByCategory.value[c.id]
     }
+    // Tree-only snapshots with empty counts poison the cache (title shows 0 while sites load).
+    if (!Object.keys(counts).length) return
     writePackCategoryCache(pid, tree, counts)
+  }
+
+  function setDirectCount(categoryId: number, directCount: number, opts?: { truncated?: boolean }) {
+    const id = Number(categoryId)
+    const prev = countsByCategory.value[id]
+    const next = opts?.truncated ? Math.max(prev ?? 0, directCount) : directCount
+    if (prev === next) return
+    countsByCategory.value = { ...countsByCategory.value, [id]: next }
+    if (loadedPackId.value != null) persistPackCategorySnapshot(loadedPackId.value)
   }
 
   async function fetchPackCategories(packId: number) {
@@ -269,6 +281,7 @@ export const useCatalogStore = defineStore('catalog', () => {
 
   async function loadSitesForCategory(categoryId: number) {
     if (loadedPackId.value == null) return
+    const pageLimit = 500
     const { data, error: err } = await supabase
       .from('site')
       .select(
@@ -278,13 +291,15 @@ export const useCatalogStore = defineStore('catalog', () => {
       .eq('category_id', categoryId)
       .eq('status', 'PUBLISHED')
       .order('sort_order')
-      .limit(500)
+      .limit(pageLimit)
     throwOn(err)
     const mapped = ((data ?? []) as SiteRow[]).map(mapSite)
     sites.value = [
       ...sites.value.filter((s) => !(s.packId === loadedPackId.value && s.categoryId === categoryId)),
       ...mapped,
     ]
+    // Keep header / sidebar counts in sync with the list we just showed.
+    setDirectCount(categoryId, mapped.length, { truncated: mapped.length >= pageLimit })
   }
 
   async function searchSites(packId: number, query: string) {

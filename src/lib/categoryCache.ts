@@ -1,6 +1,6 @@
 import type { Category } from '../types'
 
-const PREFIX = 'bm-cat-v1:'
+const PREFIX = 'bm-cat-v2:'
 /** Safety cap within a tab session; sessionStorage already clears when the tab closes. */
 const MAX_AGE_MS = 12 * 60 * 60 * 1000
 
@@ -15,10 +15,12 @@ function key(packId: number) {
   return `${PREFIX}${packId}`
 }
 
-/** Drop any leftover localStorage entries from the previous cache strategy. */
+/** Drop any leftover entries from earlier cache strategies. */
 function purgeLegacyLocalCache(packId: number) {
   try {
+    localStorage.removeItem(`bm-cat-v1:${packId}`)
     localStorage.removeItem(key(packId))
+    sessionStorage.removeItem(`bm-cat-v1:${packId}`)
   } catch {
     // ignore
   }

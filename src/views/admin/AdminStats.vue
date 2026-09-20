@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
 import { useCatalogStore } from '../../stores/catalog'
+import { ElMessage } from '../../lib/epFeedback'
 
 const catalog = useCatalogStore()
 const loading = ref(true)

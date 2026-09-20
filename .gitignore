@@ -6,6 +6,7 @@ scripts/bookmarks.local
 
 # local tooling, not part of the app
 .cursor/
+.codegraph/
 .tmp-ui/
 
 # python

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { toast } from '../lib/toast'
 import AccountNav from '../components/AccountNav.vue'
 import BookmarkShell from '../components/BookmarkShell.vue'
+import SimplePager from '../components/SimplePager.vue'
 import { faviconSrc } from '../lib/exportPack'
 import { hostOf } from '../lib/tree'
 import { useCatalogStore } from '../stores/catalog'
@@ -39,7 +40,7 @@ onMounted(async () => {
     await catalog.loadFavorites()
     sites.value = catalog.favoriteSites()
   } catch (e) {
-    ElMessage.error(e instanceof Error ? e.message : '加载失败')
+    toast.error(e instanceof Error ? e.message : '加载失败')
   } finally {
     loading.value = false
   }
@@ -59,14 +60,14 @@ async function onFav(site: Site) {
   try {
     const res = await catalog.toggleFavorite(site.id)
     if (!res.ok) {
-      ElMessage.warning(res.message)
+      toast.warning(res.message)
       void router.push({ name: 'login', query: { redirect: route.fullPath } })
       return
     }
     sites.value = catalog.favoriteSites()
-    ElMessage.success(res.message)
+    toast.success(res.message)
   } catch (e) {
-    ElMessage.error(e instanceof Error ? e.message : '操作失败')
+    toast.error(e instanceof Error ? e.message : '操作失败')
   }
 }
 </script>
@@ -118,14 +119,7 @@ async function onFav(site: Site) {
                 </div>
               </div>
               <div v-if="total > 0" class="pager">
-                <el-pagination
-                  v-model:current-page="page"
-                  v-model:page-size="pageSize"
-                  :total="total"
-                  :page-sizes="[10, 20, 50, 100]"
-                  layout="total, sizes, prev, pager, next, jumper"
-                  background
-                />
+                <SimplePager v-model:page="page" v-model:page-size="pageSize" :total="total" />
               </div>
             </template>
           </section>

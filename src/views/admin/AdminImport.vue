@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { ElMessage, type UploadFile } from 'element-plus'
 import { formatDate } from '../../lib/tree'
 import { useCatalogStore } from '../../stores/catalog'
 import type { ImportBatch } from '../../types'
+import { ElMessage } from '../../lib/epFeedback'
+
+type UploadFile = { raw?: File }
 
 const catalog = useCatalogStore()
 const last = ref<ImportBatch | null>(null)

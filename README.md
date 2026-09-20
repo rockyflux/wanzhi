@@ -48,7 +48,7 @@ npm run db:schema   # 执行 scripts/schema.sql
 npm run db:seed     # 试用账号 + 示例数据
 ```
 
-试用账号：`admin` / `admin123`（管理员），`user` / `user123`（普通用户）。登录名会被写成 `用户名@wanzi.local`。
+试用账号：`admin@wanzi.local` / `admin123`（管理员），`user@wanzi.local` / `user123`（普通用户）。新用户注册请填真实邮箱。
 
 现有专题从 Bookmarks 仓库的 `packs/` 导入。路径用 `--bookmarks-root`、环境变量 `BOOKMARKS_DIR`，或本机文件 `scripts/bookmarks.local`（一行路径，不提交）：
 

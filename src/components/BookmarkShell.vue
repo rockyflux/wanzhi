@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { useCatalogStore } from '../stores/catalog'
 import { packTone } from '../lib/packIcons'
 import { applyDocumentTheme } from '../lib/theme'
+import { toast } from '../lib/toast'
 import PackIcon from './PackIcon.vue'
 
 type RailMode = 'expanded' | 'collapsed' | 'hover'
@@ -97,7 +97,7 @@ onMounted(async () => {
   try {
     if (!catalog.packs.length) await catalog.loadPacks()
   } catch (e) {
-    ElMessage.error(e instanceof Error ? e.message : '专题加载失败')
+    toast.error(e instanceof Error ? e.message : '专题加载失败')
   }
 })
 
@@ -141,6 +141,7 @@ onUnmounted(() => {
               <PackIcon :icon="pack.icon" :name="pack.name" :slug="pack.slug" :size="15" />
             </span>
             <span class="hs-label">{{ pack.name }}</span>
+            <span class="hs-count">{{ pack.publishedCount.toLocaleString('zh-CN') }}</span>
           </button>
         </nav>
         <div class="hs-mode" @click.stop>

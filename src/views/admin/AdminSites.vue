@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import type { Category, Site, SiteStatus } from '../../types'
 import { flattenCategories, hostOf } from '../../lib/tree'
 import { useCatalogStore } from '../../stores/catalog'
+import { ElMessage, ElMessageBox } from '../../lib/epFeedback'
 
 const catalog = useCatalogStore()
 const loading = ref(true)

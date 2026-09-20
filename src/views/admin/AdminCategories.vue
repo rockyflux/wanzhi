@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import type { Category } from '../../types'
+import { flattenCategories } from '../../lib/tree'
 import { useCatalogStore } from '../../stores/catalog'
+import { ElMessage, ElMessageBox } from '../../lib/epFeedback'
 
 const catalog = useCatalogStore()
 const packId = ref<number>(0)
@@ -12,13 +13,29 @@ const loading = ref(true)
 const page = ref(1)
 const pageSize = ref(20)
 
-const tree = computed(() => catalog.categories.filter((c) => c.packId === packId.value))
-const rows = computed(() => catalog.flatCategories.filter((c) => c.packId === packId.value))
+const tree = computed(() => catalog.treeOf(Number(packId.value)))
+const rows = computed(() => flattenCategories(tree.value))
 const total = computed(() => rows.value.length)
 const pagedRows = computed(() => {
   const start = (page.value - 1) * pageSize.value
   return rows.value.slice(start, start + pageSize.value)
 })
+
+async function refreshCategories(pid: number) {
+  if (!pid) {
+    loading.value = false
+    return
+  }
+  loading.value = true
+  try {
+    // Per-pack fetch: loadAdminCatalog caps categories at 10k and can miss other packs.
+    await catalog.loadCategoriesForPack(pid, { force: true })
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : '分类加载失败')
+  } finally {
+    loading.value = false
+  }
+}
 
 onMounted(async () => {
   try {
@@ -26,14 +43,14 @@ onMounted(async () => {
     packId.value = catalog.packs[0]?.id ?? 0
   } catch (e) {
     ElMessage.error(e instanceof Error ? e.message : '加载失败')
-  } finally {
     loading.value = false
   }
 })
 
-watch(packId, () => {
+watch(packId, (id) => {
   parentId.value = null
   page.value = 1
+  void refreshCategories(Number(id))
 })
 
 watch([total, pageSize], () => {
@@ -56,7 +73,7 @@ async function add() {
     return
   }
   try {
-    await catalog.addCategory(parentId.value, name.value.trim(), packId.value)
+    await catalog.addCategory(parentId.value, name.value.trim(), Number(packId.value))
     ElMessage.success('已创建')
     name.value = ''
   } catch (e) {

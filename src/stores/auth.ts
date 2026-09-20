@@ -14,10 +14,15 @@ type ProfileRow = {
   created_at?: string
 }
 
-function toEmail(username: string) {
-  const clean = username.trim().toLowerCase()
+function toEmail(value: string) {
+  const clean = value.trim().toLowerCase()
   if (clean.includes('@')) return clean
+  // 兼容旧试用账号：admin → admin@wanzi.local
   return `${clean}@wanzi.local`
+}
+
+function isEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
 }
 
 function mapUser(profile: ProfileRow): User {
@@ -107,8 +112,11 @@ export const useAuthStore = defineStore('auth', () => {
     return boot
   }
 
-  async function login(username: string, password: string) {
-    const email = toEmail(username)
+  async function login(emailInput: string, password: string) {
+    const email = toEmail(emailInput)
+    if (!emailInput.trim() || !password) {
+      return { ok: false, message: '请填写邮箱和密码' }
+    }
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) return { ok: false, message: error.message }
     const uid = data.user?.id
@@ -133,19 +141,22 @@ export const useAuthStore = defineStore('auth', () => {
     return { ok: true, message: '登录成功' }
   }
 
-  async function register(username: string, password: string, nickname: string) {
-    const name = username.trim()
-    if (!name || !password.trim()) {
-      return { ok: false, message: '请填写用户名和密码' }
+  async function register(emailInput: string, password: string, nickname: string) {
+    const email = emailInput.trim().toLowerCase()
+    if (!email || !password.trim()) {
+      return { ok: false, message: '请填写邮箱和密码' }
     }
-    const email = toEmail(name)
+    if (!isEmail(email)) {
+      return { ok: false, message: '请输入有效的邮箱地址' }
+    }
+    const nick = nickname.trim() || email.split('@')[0] || '用户'
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          username: name,
-          nickname: nickname.trim() || name,
+          username: email,
+          nickname: nick,
         },
       },
     })
@@ -162,6 +173,44 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     await supabase.auth.signOut()
     user.value = null
+  }
+
+  async function changePassword(currentPassword: string, newPassword: string) {
+    const next = newPassword.trim()
+    if (!currentPassword || !next) {
+      return { ok: false, message: '请填写当前密码和新密码' }
+    }
+    if (next.length < 6) {
+      return { ok: false, message: '新密码至少 6 位' }
+    }
+    if (currentPassword === next) {
+      return { ok: false, message: '新密码不能与当前密码相同' }
+    }
+    if (!user.value) {
+      return { ok: false, message: '请先登录' }
+    }
+    const email = toEmail(user.value.username)
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+    })
+    if (verifyError) {
+      return { ok: false, message: '当前密码不正确' }
+    }
+    const { error } = await supabase.auth.updateUser({ password: next })
+    if (error) return { ok: false, message: error.message }
+    return { ok: true, message: '密码已修改' }
+  }
+
+  async function adminResetPassword(userId: string, newPassword: string) {
+    const next = newPassword.trim()
+    if (!next) throw new Error('请填写新密码')
+    if (next.length < 6) throw new Error('新密码至少 6 位')
+    const { error } = await supabase.rpc('admin_reset_password', {
+      p_user_id: userId,
+      p_new_password: next,
+    })
+    if (error) throw error
   }
 
   async function listUsers(): Promise<ProfileUser[]> {
@@ -191,6 +240,8 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
+    changePassword,
+    adminResetPassword,
     listUsers,
     setUserStatus,
   }

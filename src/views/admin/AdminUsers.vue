@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import { formatDate, formatDateTime } from '../../lib/tree'
 import { useAuthStore } from '../../stores/auth'
 import type { ProfileUser } from '../../types'
+import { ElMessage, ElMessageBox } from '../../lib/epFeedback'
 
 const auth = useAuthStore()
 const loading = ref(true)
@@ -62,6 +62,36 @@ async function unban(row: ProfileUser) {
     ElMessage.error(e instanceof Error ? e.message : '操作失败')
   }
 }
+
+async function resetPassword(row: ProfileUser) {
+  let password = ''
+  try {
+    const { value } = await ElMessageBox.prompt(
+      `为「${row.nickname}」设置新密码（至少 6 位）`,
+      '重置密码',
+      {
+        inputType: 'password',
+        inputPlaceholder: '新密码',
+        confirmButtonText: '重置',
+        cancelButtonText: '取消',
+        inputValidator: (val) => {
+          if (!val?.trim()) return '请填写新密码'
+          if (val.trim().length < 6) return '新密码至少 6 位'
+          return true
+        },
+      },
+    )
+    password = value
+  } catch {
+    return
+  }
+  try {
+    await auth.adminResetPassword(row.id, password)
+    ElMessage.success('密码已重置')
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : '重置失败')
+  }
+}
 </script>
 
 <template>
@@ -103,8 +133,9 @@ async function unban(row: ProfileUser) {
       <el-table-column label="注册时间" width="140">
         <template #default="{ row }">{{ row.createdAt ? formatDate(row.createdAt) : '—' }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="120">
+      <el-table-column label="操作" width="200">
         <template #default="{ row }">
+          <el-button size="small" @click="resetPassword(row)">重置密码</el-button>
           <el-button
             v-if="row.status !== 'banned'"
             size="small"
