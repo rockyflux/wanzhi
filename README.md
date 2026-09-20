@@ -37,7 +37,7 @@ npm run dev
    这两个会在 **Build** 步骤注入；改完后必须重新跑部署，已上线的 JS 不会自动更新。
 3. 推送 `main`，或在 Actions 里手动跑 **Deploy to GitHub Pages**
 
-站点地址一般是 `https://<用户名>.github.io/<仓库名>/`（本仓库为 `/wanzhi/`）。本地开发不设 `VITE_BASE`，默认 `/`。
+站点地址一般是 `https://<用户名>.github.io/<仓库名>/`（本仓库为 `/wanzhi/`）。Pages 设了自定义域名后，站点挂在域名根路径，构建会改用 `VITE_BASE=/`，否则 CSS/JS 仍会请求 `/wanzhi/assets/` 并 404。改完域名后要重新跑一次部署。本地开发不设 `VITE_BASE`，默认 `/`。需要强制指定时，在 Actions Variables 里加 `VITE_BASE`。
 
 Supabase 控制台里把该 Pages 源站加入 Auth 的 Redirect / Site URL。数据库仍用本机 `npm run db:schema` / 导入脚本，不进部署流水线。
 

@@ -6,7 +6,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // GitHub Pages 项目站：构建时设 VITE_BASE=/repo-name/
+  // 项目站构建时 VITE_BASE=/仓库名/；用户站或自定义域名用 /
   base: process.env.VITE_BASE || '/',
   plugins: [
     vue(),

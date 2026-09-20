@@ -39,13 +39,24 @@ jobs:
 
       - name: Resolve Pages base path
         id: base
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          # 仓库变量 VITE_BASE 可强制覆盖（自定义域名用 /，项目页用 /仓库名/）
+          if [[ -n "${{ vars.VITE_BASE }}" ]]; then
+            echo "path=${{ vars.VITE_BASE }}" >> "$GITHUB_OUTPUT"
+            echo "Using repository variable VITE_BASE=${{ vars.VITE_BASE }}"
+            exit 0
+          fi
           name="${{ github.event.repository.name }}"
-          if [[ "$name" == *.github.io ]]; then
+          # 自定义域名挂在站点根路径，不能再用 /仓库名/
+          cname="$(gh api "repos/${{ github.repository }}/pages" --jq '.cname // empty' 2>/dev/null || true)"
+          if [[ "$name" == *.github.io ]] || [[ -n "$cname" ]]; then
             echo "path=/" >> "$GITHUB_OUTPUT"
           else
             echo "path=/${name}/" >> "$GITHUB_OUTPUT"
           fi
+          echo "custom_domain=${cname:-<none>}"
 
       - name: Build
         # Vite 只在构建时把 VITE_* 打进包；Secrets / Variables 都可以。
