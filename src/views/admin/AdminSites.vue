@@ -266,16 +266,16 @@ async function remove(s: Site) {
       </el-table-column>
       <el-table-column label="操作" width="240">
         <template #default="{ row }">
-          <el-button size="small" @click="startEdit(row)">编辑</el-button>
+          <el-button size="small" @click="startEdit(row as Site)">编辑</el-button>
           <el-button
             v-if="row.status !== 'PUBLISHED'"
             size="small"
-            @click="setStatus(row, 'PUBLISHED')"
+            @click="setStatus(row as Site, 'PUBLISHED')"
           >
             上架
           </el-button>
-          <el-button v-else size="small" @click="setStatus(row, 'OFFLINE')">下架</el-button>
-          <el-button size="small" type="danger" plain @click="remove(row)">删除</el-button>
+          <el-button v-else size="small" @click="setStatus(row as Site, 'OFFLINE')">下架</el-button>
+          <el-button size="small" type="danger" plain @click="remove(row as Site)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

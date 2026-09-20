@@ -221,9 +221,9 @@ async function remove(pack: Pack) {
       </el-table-column>
       <el-table-column label="操作" width="200">
         <template #default="{ row }">
-          <el-button size="small" @click="startEdit(row)">编辑</el-button>
-          <el-button size="small" @click="toggleStatus(row)">{{ row.status === 1 ? '下架' : '发布' }}</el-button>
-          <el-button size="small" type="danger" plain @click="remove(row)">删除</el-button>
+          <el-button size="small" @click="startEdit(row as Pack)">编辑</el-button>
+          <el-button size="small" @click="toggleStatus(row as Pack)">{{ row.status === 1 ? '下架' : '发布' }}</el-button>
+          <el-button size="small" type="danger" plain @click="remove(row as Pack)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

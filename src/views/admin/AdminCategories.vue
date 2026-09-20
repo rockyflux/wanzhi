@@ -138,8 +138,8 @@ async function remove(c: Category) {
       <el-table-column prop="path" label="path" min-width="160" />
       <el-table-column label="操作" width="160">
         <template #default="{ row }">
-          <el-button size="small" @click="rename(row)">改名</el-button>
-          <el-button size="small" type="danger" plain @click="remove(row)">删除</el-button>
+          <el-button size="small" @click="rename(row as Category)">改名</el-button>
+          <el-button size="small" type="danger" plain @click="remove(row as Category)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

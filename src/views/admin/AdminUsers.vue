@@ -135,18 +135,18 @@ async function resetPassword(row: ProfileUser) {
       </el-table-column>
       <el-table-column label="操作" width="200">
         <template #default="{ row }">
-          <el-button size="small" @click="resetPassword(row)">重置密码</el-button>
+          <el-button size="small" @click="resetPassword(row as ProfileUser)">重置密码</el-button>
           <el-button
             v-if="row.status !== 'banned'"
             size="small"
             type="danger"
             plain
             :disabled="row.id === auth.user?.id"
-            @click="ban(row)"
+            @click="ban(row as ProfileUser)"
           >
             封禁
           </el-button>
-          <el-button v-else size="small" @click="unban(row)">解封</el-button>
+          <el-button v-else size="small" @click="unban(row as ProfileUser)">解封</el-button>
         </template>
       </el-table-column>
     </el-table>
